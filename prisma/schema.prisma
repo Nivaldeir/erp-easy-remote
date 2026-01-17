@@ -1,0 +1,182 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model User {
+  id            String        @id @default(cuid())
+  name          String?
+  email         String?       @unique
+  emailVerified DateTime?     @map("email_verified")
+  image         String?
+  password      String?
+  accounts      Account[]
+  sessions      Session[]
+  workerSpaces  WorkerSpace[]
+
+  @@map("users")
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+model WorkerSpace {
+  id               String            @id @default(cuid())
+  name             String
+  description      String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  users            User[]
+  accountsPayables AccountsPayable[]
+  works            Work[]
+  contracts        Contracts[]
+  equipment        Equipment[]
+
+  @@map("worker_spaces")
+}
+
+model Work {
+  id            String      @id @default(cuid())
+  workerSpaceId String      @map("worker_space_id")
+  workerSpace   WorkerSpace @relation(fields: [workerSpaceId], references: [id])
+  name          String
+  description   String?
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+  contracts     Contracts[]
+
+  @@map("works")
+}
+
+model AccountsPayable {
+  id            String      @id @default(cuid())
+  workerSpaceId String      @map("worker_space_id")
+  workerSpace   WorkerSpace @relation(fields: [workerSpaceId], references: [id])
+
+  nf                   String? // Nota fiscal
+  issuer               DateTime? // Emitente
+  supplier             String? // Fornecedor
+  product_and_services String? // Produtos e serviços
+  construction_cost    String? // Custo da construção
+  formPayment          String? // Formato de pagamento
+  valueAmount          Float //Valor do pagamento
+  installments         Int? //Parcelas
+  valueTotal           Float //Valor total
+
+  maturity   DateTime // Data de vencimento
+  launchDate DateTime // Data de lançamento
+  paidDate   DateTime // Data de pagamento
+
+  status    StatusAccountsPayable @default(PENDING) // Status
+  createdAt DateTime              @default(now())
+  updatedAt DateTime              @updatedAt
+
+  @@map("accounts_payables")
+}
+
+model Equipment {
+  id            String      @id @default(cuid())
+  workerSpaceId String      @map("worker_space_id")
+  workerSpace   WorkerSpace @relation(fields: [workerSpaceId], references: [id])
+  name          String
+  mark          String?
+  model         String?
+  year          String?
+  hours         Int?
+  amountDays    Int?
+  amountMoths   Int?
+  description   String?
+
+  nextMaintenance DateTime?
+  lastMaintenance DateTime?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  contracts       Contracts[]
+
+  @@map("equipments")
+}
+
+model Contracts {
+  id            String          @id
+  workerSpaceId String          @map("worker_space_id")
+  workerSpace   WorkerSpace     @relation(fields: [workerSpaceId], references: [id])
+  name          String
+  description   String?
+  status        StatusContracts @default(PENDING)
+
+  clientName String?
+
+  workId String?
+  work   Work?   @relation(fields: [workId], references: [id])
+
+  initDate    DateTime?
+  endDate     DateTime?
+  valueDaily  Float?
+  amountDays  Int?
+  amountTotal Float?
+
+  equipmentId String?
+  equipment   Equipment? @relation(fields: [equipmentId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("contracts")
+}
+
+enum StatusContracts {
+  ACTIVE
+  INACTIVE
+  PENDING
+  CANCELLED
+  FINISHED
+}
+
+enum StatusAccountsPayable {
+  PENDING
+  PAID
+  LATE
+}
