@@ -1,10 +1,13 @@
 import { prisma } from "@/src/shared/config/db";
-import { publicProcedure, router } from "../trpc";
+import { protectedProcedure, router } from "../trpc";
 import { equipamentGetAllInput } from "./input/equipament";
+import { validateWorkspaceAccess, getUserId } from "./helpers/workspace-validation";
 
 export const equipamentsRouter = router({
 
-  getAll: publicProcedure.input(equipamentGetAllInput).query(async ({ input }) => {
+  getAll: protectedProcedure.input(equipamentGetAllInput).query(async ({ ctx, input }) => {
+    const userId = getUserId(ctx);
+    await validateWorkspaceAccess(input.workspaceId, userId);
     const where: any = {};
     
     if (input.workspaceId && input.workspaceId !== "all") {

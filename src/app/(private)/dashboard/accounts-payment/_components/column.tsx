@@ -7,6 +7,7 @@ import { DropdownMenu } from "@/src/shared/components/global/ui/dropdown-menu";
 import { MoreHorizontal, TableOfContents } from "lucide-react";
 import { useAccountsPayableAction } from "../hook/accounts-payable.action";
 import { formatCurrency } from "@/src/shared/lib/currency";
+import { formatDate } from "@/src/shared/lib/date";
 
 export const AccountsPaymentColumn: ColumnDef<AccountsPayable>[] = [
   // 1. Nota fiscal
@@ -16,10 +17,10 @@ export const AccountsPaymentColumn: ColumnDef<AccountsPayable>[] = [
     enableSorting: false,
     enableHiding: false,
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Nota Fiscal" />
+      <DataTableColumnHeader column={column} title="NF" />
     ),
     cell: ({ row }) => (
-      <div className="text-center">{row.original.nf || "-"}</div>
+      <div className="text-center">{row.original.nf?.toString() || "-"}</div>
     ),
   },
   // 2. Data de emissão
@@ -29,16 +30,12 @@ export const AccountsPaymentColumn: ColumnDef<AccountsPayable>[] = [
     enableSorting: false,
     enableHiding: false,
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Data de Emissão" />
+      <DataTableColumnHeader column={column} title="Data de Em." />
     ),
     cell: ({ row }) => {
       return (
         <div className="flex justify-center">
-          {row.original.launchDate.toLocaleDateString('pt-BR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-          })}
+          {formatDate(row.original.launchDate)}
         </div>
       );
     },
@@ -50,10 +47,10 @@ export const AccountsPaymentColumn: ColumnDef<AccountsPayable>[] = [
     enableSorting: false,
     enableHiding: false,
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Fornecedor" />
+      <DataTableColumnHeader column={column} title="Fornec." />
     ),
     cell: ({ row }) => (
-      <div className="text-center">{row.original.supplier || "-"}</div>
+      <div className="text-start max-w-40 truncate">{row.original.supplier?.toString() || "-"}</div>
     ),
   },
   // 4. Produto / Serviço
@@ -63,10 +60,10 @@ export const AccountsPaymentColumn: ColumnDef<AccountsPayable>[] = [
     enableSorting: false,
     enableHiding: false,
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Produto / Serviço" />
+      <DataTableColumnHeader column={column} title="Prod. / Serv." />
     ),
     cell: ({ row }) => (
-      <div className="text-center">{row.original.product_and_services || "-"}</div>
+      <div className="text-start max-w-40 truncate">{row.original.product_and_services?.toString() || "-"}</div>
     ),
   },
   // 5. Custo da obra
@@ -76,10 +73,10 @@ export const AccountsPaymentColumn: ColumnDef<AccountsPayable>[] = [
     enableSorting: false,
     enableHiding: false,
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Custo da Obra" />
+      <DataTableColumnHeader column={column} title="Custo Obr." />
     ),
     cell: ({ row }) => (
-      <div className="text-center">{row.original.construction_cost || "-"}</div>
+      <div className="text-start">{row.original.construction_cost?.toString() || "-"}</div>
     ),
   },
   // 6. Forma de pagamento
@@ -89,20 +86,20 @@ export const AccountsPaymentColumn: ColumnDef<AccountsPayable>[] = [
     enableSorting: false,
     enableHiding: false,
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Forma de Pagamento" />
+      <DataTableColumnHeader column={column} title="Forma Pag." />
     ),
     cell: ({ row }) => (
-      <div className="text-center">{row.original.formPayment || "-"}</div>
+      <div className="text-center">{row.original.formPayment?.toString() || "-"}</div>
     ),
   },
   // 7. Valor nota fiscal
   {
     id: "valueTotal",
     accessorKey: "valueTotal",
-    enableSorting: false,
+    enableSorting: true,
     enableHiding: false,
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Valor Nota Fiscal" />
+      <DataTableColumnHeader column={column} title="Valor NF" />
     ),
     cell: ({ row }) => {
       return (
@@ -119,10 +116,10 @@ export const AccountsPaymentColumn: ColumnDef<AccountsPayable>[] = [
     enableSorting: false,
     enableHiding: false,
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Parcela" />
+      <DataTableColumnHeader column={column} title="Parcelas" />
     ),
     cell: ({ row }) => (
-      <div className="text-center">{row.original.installments || "-"}</div>
+      <div className="text-center">{row.original.installments?.toString() || "-"}</div>
     ),
   },
   // 9. Valor da parcela
@@ -132,7 +129,7 @@ export const AccountsPaymentColumn: ColumnDef<AccountsPayable>[] = [
     enableSorting: false,
     enableHiding: false,
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Valor da Parcela" />
+      <DataTableColumnHeader column={column} title="Valor Parcela" />
     ),
     cell: ({ row }) => {
       return (
@@ -149,16 +146,12 @@ export const AccountsPaymentColumn: ColumnDef<AccountsPayable>[] = [
     enableSorting: false,
     enableHiding: false,
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Vencimento Original" />
+      <DataTableColumnHeader column={column} title="Vencimento" />
     ),
     cell: ({ row }) => {
       return (
         <div className="flex justify-center">
-          {row.original.maturity.toLocaleDateString('pt-BR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-          })}
+          {formatDate(row.original.maturity)}
         </div>
       );
     },
@@ -170,16 +163,12 @@ export const AccountsPaymentColumn: ColumnDef<AccountsPayable>[] = [
     enableSorting: false,
     enableHiding: false,
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Lançamento" />
+      <DataTableColumnHeader column={column} title="Lanç." />
     ),
     cell: ({ row }) => {
       return (
         <div className="flex justify-center">
-          {row.original.launchDate.toLocaleDateString('pt-BR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-          })}
+          {formatDate(row.original.launchDate)}
         </div>
       );
     },
@@ -191,17 +180,12 @@ export const AccountsPaymentColumn: ColumnDef<AccountsPayable>[] = [
     enableSorting: false,
     enableHiding: false,
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Data de Pagamento" />
+      <DataTableColumnHeader column={column} title="Pag." />
     ),
     cell: ({ row }) => {
-      if (!row.original.paidDate) return <div className="text-center">-</div>;
       return (
         <div className="flex justify-center">
-          {row.original.paidDate.toLocaleDateString('pt-BR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-          })}
+          {formatDate(row.original.paidDate)}
         </div>
       );
     },
@@ -213,7 +197,7 @@ export const AccountsPaymentColumn: ColumnDef<AccountsPayable>[] = [
     enableSorting: false,
     enableHiding: false,
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Status" />
+      <DataTableColumnHeader column={column} title="Situação" />
     ),
     cell: ({ row }) => {
       const status = row.original.status;

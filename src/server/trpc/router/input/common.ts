@@ -17,5 +17,9 @@ export const workspaceIdWithPaginationInput = workspaceIdInput.extend({
 export const accountPayableGetAllInput = workspaceIdWithPaginationInput.extend({
   search: z.string().optional(),
   status: z.enum(["all", "PENDING", "PAID"]).optional(),
+  sort: z.array(z.object({
+    id: z.string(),
+    desc: z.boolean(),
+  })).optional(),
 });
 

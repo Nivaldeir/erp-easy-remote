@@ -15,6 +15,21 @@ export const useAccountsPayment = ({ search, status }: UseAccountsPaymentProps =
   const { selectedWorkspaceId } = useWorkspace();
   const [page] = useQueryState("accounts-payment-page", parseAsInteger.withDefault(1));
   const [perPage] = useQueryState("accounts-payment-perPage", parseAsInteger.withDefault(10));
+  const [sorting] = useQueryState("sort", {
+    parse: (value) => {
+      try {
+        const parsed = JSON.parse(value);
+        if (Array.isArray(parsed) && parsed.every((item: any) => item.id && typeof item.desc === "boolean")) {
+          return parsed;
+        }
+        return [];
+      } catch {
+        return [];
+      }
+    },
+    serialize: (value) => JSON.stringify(value),
+    defaultValue: [],
+  });
 
   const { data, isLoading: isLoadingData } = api.accountPayable.getAll.useQuery({
     workspaceId: selectedWorkspaceId || undefined,
@@ -22,6 +37,7 @@ export const useAccountsPayment = ({ search, status }: UseAccountsPaymentProps =
     status: (status as "all" | "PENDING" | "PAID") || "all",
     page,
     perPage,
+    sort: sorting.length > 0 ? sorting : undefined,
   });
 
   const { data: summary, isLoading: isLoadingSummary } = api.accountPayable.getSummary.useQuery({

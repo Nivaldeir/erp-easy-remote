@@ -22,6 +22,7 @@ import {
 } from "@/src/shared/components/global/ui/dropdown-menu"
 import { api } from "@/src/shared/context/trpc-context"
 import { useWorkspace } from "@/src/shared/context/workspace-context"
+import { useModal } from "@/src/shared/context/modal-context"
 import Link from "next/link"
 import {
   LifeBuoy,
@@ -33,8 +34,11 @@ import {
   ChevronsUpDown,
   Check,
   LogOut,
+  Plus,
+  PlusIcon,
 } from "lucide-react"
 import { signOut } from "next-auth/react"
+import { Button } from "./ui/button"
 
 const data = {
   navMain: [
@@ -89,7 +93,18 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: workspaces, isLoading: isLoadingWorkspaces } = api.workspace.getAll.useQuery()
-  const { selectedWorkspaceId, setSelectedWorkspaceId } = useWorkspace()
+  const { openModal } = useModal()
+  
+  let selectedWorkspaceId: string | null = null;
+  let setSelectedWorkspaceId: ((id: string | null) => void) | null = null;
+  
+  try {
+    const workspace = useWorkspace();
+    selectedWorkspaceId = workspace.selectedWorkspaceId;
+    setSelectedWorkspaceId = workspace.setSelectedWorkspaceId;
+  } catch (error) {
+    console.warn("WorkspaceProvider não disponível no AppSidebar");
+  }
 
   const selectedWorkspace = workspaces?.find((w) => w.id === selectedWorkspaceId)
   const displayName = isLoadingWorkspaces
@@ -97,6 +112,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     : selectedWorkspaceId === null
       ? "Todos os Workspaces"
       : (selectedWorkspace?.name ?? "Selecione o workspace")
+  
+  const handleWorkspaceChange = (id: string | null) => {
+    if (setSelectedWorkspaceId) {
+      setSelectedWorkspaceId(id);
+    }
+  }
+
+  const handleOpenCreateWorkspaceModal = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    const module = await import("@/src/shared/components/modals/form-workspace")
+    openModal("create-workspace", module.FormWorkspace, undefined, {
+      size: "md",
+    })
+  }
 
   return (
     <Sidebar variant="inset" {...props}>
@@ -128,10 +157,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 side="bottom"
                 sideOffset={4}
               >
-                <DropdownMenuLabel className="text-xs text-muted-foreground">Workspaces</DropdownMenuLabel>
+                <DropdownMenuLabel className="text-xs text-muted-foreground flex items-center justify-between">
+                  <span>Workspaces</span>
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    className="w-4 h-4 rounded-sm cursor-pointer"
+                    onClick={handleOpenCreateWorkspaceModal}
+                  >
+                    <PlusIcon className="size-4" />
+                  </Button>
+                </DropdownMenuLabel>
                 {workspaces && workspaces.length > 1 && (
                   <>
-                    <DropdownMenuItem onClick={() => setSelectedWorkspaceId(null)} className="gap-2 p-2">
+                    <DropdownMenuItem onClick={() => handleWorkspaceChange(null)} className="gap-2 p-2">
                       <div className="flex size-6 items-center justify-center rounded-sm border">
                         <Building2 className="size-4 shrink-0" />
                       </div>
@@ -145,7 +184,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   workspaces.map((workspace) => (
                     <DropdownMenuItem
                       key={workspace.id}
-                      onClick={() => setSelectedWorkspaceId(workspace.id)}
+                      onClick={() => handleWorkspaceChange(workspace.id)}
                       className="gap-2 p-2"
                     >
                       <div className="flex size-6 items-center justify-center rounded-sm border bg-background">

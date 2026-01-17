@@ -1,17 +1,11 @@
 import { prisma } from "@/src/shared/config/db";
 import { protectedProcedure, router } from "../trpc";
+import { workspaceCreateInput } from "./input/workspace";
+import { getUserId } from "./helpers/workspace-validation";
 
 export const workspaceRouter = router({
   getAll: protectedProcedure.query(async ({ ctx }) => {
-    if (!ctx.session?.user) {
-      throw new Error("Usuário não autenticado");
-    }
-
-    const userId = (ctx.session.user as any).id;
-    
-    if (!userId) {
-      throw new Error("ID do usuário não encontrado");
-    }
+    const userId = getUserId(ctx);
 
     try {
       const user = await prisma.user.findUnique({
@@ -53,5 +47,30 @@ export const workspaceRouter = router({
       throw error;
     }
   }),
+
+  create: protectedProcedure
+    .input(workspaceCreateInput)
+    .mutation(async ({ ctx, input }) => {
+      const userId = getUserId(ctx);
+
+      try {
+        const workspace = await prisma.workerSpace.create({
+          data: {
+            name: input.name,
+            description: input.description || null,
+            users: {
+              connect: {
+                id: userId,
+              },
+            },
+          },
+        });
+
+        return workspace;
+      } catch (error) {
+        console.error("Erro ao criar workspace:", error);
+        throw new Error("Erro ao criar workspace");
+      }
+    }),
 });
 

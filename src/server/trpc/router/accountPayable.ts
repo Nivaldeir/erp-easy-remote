@@ -1,20 +1,41 @@
 import { prisma } from "@/src/shared/config/db";
-import { publicProcedure, router } from "../trpc";
+import { protectedProcedure, router } from "../trpc";
 import { accountPayableCreateInput } from "./input/account-payable";
 import { randomId } from "@/src/shared/lib/random-id";
 import { workspaceIdInput, accountPayableGetAllInput } from "./input/common";
 import { z } from "zod";
+import { validateWorkspaceAccess, getUserId } from "./helpers/workspace-validation";
 
 export const accountPayableRouter = router({
   
-  getById: publicProcedure.input(z.object({ id: z.string() })).query(async ({ input }) => {
+  getById: protectedProcedure.input(z.object({ id: z.string() })).query(async ({ ctx, input }) => {
+    const userId = getUserId(ctx);
     const accountPayable = await prisma.accountsPayable.findUnique({
       where: { id: input.id },
+      include: {
+        workerSpace: {
+          include: {
+            users: true,
+          },
+        },
+      },
     });
+
+    if (!accountPayable) {
+      return null;
+    }
+
+    const hasAccess = accountPayable.workerSpace.users.some((user) => user.id === userId);
+    if (!hasAccess) {
+      throw new Error("Você não tem acesso a esta conta a pagar");
+    }
+
     return accountPayable;
   }),
 
-  getAll: publicProcedure.input(accountPayableGetAllInput).query(async ({ input }) => {
+  getAll: protectedProcedure.input(accountPayableGetAllInput).query(async ({ ctx, input }) => {
+    const userId = getUserId(ctx);
+    await validateWorkspaceAccess(input.workspaceId, userId);
     const where: any = {};
     
     if (input.workspaceId && input.workspaceId !== "all") {
@@ -33,12 +54,46 @@ export const accountPayableRouter = router({
       where.status = input.status;
     }
 
+    // Construir orderBy baseado no sorting
+    let orderBy: any = { maturity: "desc" }; // Default
+    
+    if (input.sort && input.sort.length > 0) {
+      // Mapear campos do frontend para campos do Prisma
+      const fieldMapping: Record<string, string> = {
+        valueTotal: "valueTotal",
+        valueAmount: "valueAmount",
+        maturity: "maturity",
+        launchDate: "launchDate",
+        issueDate: "launchDate", // issueDate é o id da coluna, mas o campo no Prisma é launchDate
+        paidDate: "paidDate",
+        nf: "nf",
+        supplier: "supplier",
+        product_and_services: "product_and_services",
+        status: "status",
+      };
+
+      // Se houver apenas um campo, usar objeto simples
+      if (input.sort.length === 1) {
+        const sortItem = input.sort[0];
+        const prismaField = fieldMapping[sortItem.id] || sortItem.id;
+        orderBy = {
+          [prismaField]: sortItem.desc ? "desc" : "asc",
+        };
+      } else {
+        // Múltiplos campos, usar array
+        orderBy = input.sort.map((sortItem) => {
+          const prismaField = fieldMapping[sortItem.id] || sortItem.id;
+          return {
+            [prismaField]: sortItem.desc ? "desc" : "asc",
+          };
+        });
+      }
+    }
+
     const [accountPayables, total] = await Promise.all([
       prisma.accountsPayable.findMany({
         where,
-        orderBy: {
-          maturity: "asc",
-        },
+        orderBy,
         skip: (input.page - 1) * input.perPage,
         take: input.perPage,
       }),
@@ -53,7 +108,9 @@ export const accountPayableRouter = router({
       pageCount: Math.ceil(total / input.perPage),
     };
   }),
-  getSummary: publicProcedure.input(workspaceIdInput).query(async ({ input }) => {
+  getSummary: protectedProcedure.input(workspaceIdInput).query(async ({ ctx, input }) => {
+    const userId = getUserId(ctx);
+    await validateWorkspaceAccess(input.workspaceId, userId);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -167,7 +224,9 @@ export const accountPayableRouter = router({
       },
     };
   }),
-  createOrUpdate: publicProcedure.input(accountPayableCreateInput).mutation(async ({ input }) => {
+  createOrUpdate: protectedProcedure.input(accountPayableCreateInput).mutation(async ({ ctx, input }) => {
+    const userId = getUserId(ctx);
+    await validateWorkspaceAccess(input.workerSpaceId, userId);
     
     const data: any = {
       nf: input.nf || undefined,

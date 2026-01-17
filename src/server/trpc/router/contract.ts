@@ -4,15 +4,36 @@ import { contractCreateInput } from "./input/contract";
 import { randomId } from "@/src/shared/lib/random-id";
 import { workspaceIdInput } from "./input/common";
 import { z } from "zod";
+import { validateWorkspaceAccess, getUserId } from "./helpers/workspace-validation";
 
 export const contractRouter = router({
-  getById: protectedProcedure.input(z.object({ id: z.string() })).query(async ({ input }) => {
+  getById: protectedProcedure.input(z.object({ id: z.string() })).query(async ({ ctx, input }) => {
+    const userId = getUserId(ctx);
     const contract = await prisma.contracts.findUnique({
       where: { id: input.id },
+      include: {
+        workerSpace: {
+          include: {
+            users: true,
+          },
+        },
+      },
     });
+
+    if (!contract) {
+      return null;
+    }
+
+    const hasAccess = contract.workerSpace.users.some((user) => user.id === userId);
+    if (!hasAccess) {
+      throw new Error("Você não tem acesso a este contrato");
+    }
+
     return contract;
   }),
-  getAll: protectedProcedure.input(workspaceIdInput).query(async ({ input }) => {
+  getAll: protectedProcedure.input(workspaceIdInput).query(async ({ ctx, input }) => {
+    const userId = getUserId(ctx);
+    await validateWorkspaceAccess(input.workspaceId, userId);
     const where: any = {};
 
     if (input.workspaceId && input.workspaceId !== "all") {
@@ -24,7 +45,9 @@ export const contractRouter = router({
     });
     return contracts;
   }),
-  getSummary: protectedProcedure.input(workspaceIdInput).query(async ({ input }) => {
+  getSummary: protectedProcedure.input(workspaceIdInput).query(async ({ ctx, input }) => {
+    const userId = getUserId(ctx);
+    await validateWorkspaceAccess(input.workspaceId, userId);
     const where: any = {};
 
     if (input.workspaceId && input.workspaceId !== "all") {
@@ -51,7 +74,9 @@ export const contractRouter = router({
       total,
     };
   }),
-  createOrUpdate: protectedProcedure.input(contractCreateInput).mutation(async ({ input }) => {
+  createOrUpdate: protectedProcedure.input(contractCreateInput).mutation(async ({ ctx, input }) => {
+    const userId = getUserId(ctx);
+    await validateWorkspaceAccess(input.workerSpaceId, userId);
     if (input.id) {
       return await prisma.contracts.update({
         where: { id: input.id },

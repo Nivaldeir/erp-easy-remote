@@ -19,7 +19,7 @@ export const useHome = () => {
   const { data: accountsPayableData } = api.accountPayable.getAll.useQuery({
     workspaceId: selectedWorkspaceId || undefined,
     page: 1,
-    perPage: 1000,
+    perPage: 100,
   });
 
   const accountsPayable = accountsPayableData?.data || [];

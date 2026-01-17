@@ -310,7 +310,7 @@ async function main() {
     data: {
       workerSpaceId: workerSpace1.id,
       nf: "NF-001234",
-      issuer: "Fornecedor de Materiais ABC",
+      issuer: new Date("2024-12-10"),
       supplier: "Materiais de Construção XYZ",
       product_and_services: "Cimento, Areia, Tijolos",
       construction_cost: "Fundação e Estrutura",
@@ -329,7 +329,7 @@ async function main() {
     data: {
       workerSpaceId: workerSpace1.id,
       nf: "NF-001567",
-      issuer: "Equipamentos e Ferramentas LTDA",
+      issuer: new Date("2024-12-10"),
       supplier: "Distribuidora de Equipamentos",
       product_and_services: "Ferramentas elétricas e manuais",
       construction_cost: "Acabamento",
@@ -348,7 +348,7 @@ async function main() {
     data: {
       workerSpaceId: workerSpace1.id,
       nf: "NF-001890",
-      issuer: "Serviços de Engenharia S.A.",
+      issuer: new Date("2024-12-10"),
       supplier: "Consultoria Técnica",
       product_and_services: "Serviços de engenharia e projeto",
       construction_cost: "Projeto e Consultoria",
@@ -367,7 +367,7 @@ async function main() {
     data: {
       workerSpaceId: workerSpace2.id,
       nf: "NF-002345",
-      issuer: "Materiais Elétricos e Hidráulicos",
+      issuer: new Date("2024-12-10"),
       supplier: "Distribuidora Elétrica",
       product_and_services: "Fios, Cabos, Tubulações",
       construction_cost: "Instalações Elétricas e Hidráulicas",
@@ -386,7 +386,7 @@ async function main() {
     data: {
       workerSpaceId: workerSpace2.id,
       nf: "NF-002678",
-      issuer: "Transporte e Logística",
+      issuer: new Date("2024-12-10"),
       supplier: "Transportadora Rápida",
       product_and_services: "Serviços de transporte de materiais",
       construction_cost: "Logística",
@@ -409,7 +409,7 @@ async function main() {
     data: {
       workerSpaceId: workerSpace1.id,
       nf: "NF-003001",
-      issuer: "Materiais de Acabamento",
+      issuer: new Date("2024-12-10"),
       supplier: "Acabamentos Premium",
       product_and_services: "Tintas, Revestimentos, Pisos",
       construction_cost: "Acabamento",
@@ -428,7 +428,7 @@ async function main() {
     data: {
       workerSpaceId: workerSpace1.id,
       nf: "NF-003002",
-      issuer: "Serviços de Limpeza",
+      issuer: new Date("2024-12-10"),
       supplier: "Limpeza Profissional",
       product_and_services: "Serviços de limpeza pós-obra",
       construction_cost: "Limpeza",
@@ -448,7 +448,7 @@ async function main() {
     data: {
       workerSpaceId: workerSpace1.id,
       nf: "NF-003100",
-      issuer: "Fornecedor de Aço",
+      issuer: new Date("2024-12-10"),
       supplier: "Aços e Estruturas",
       product_and_services: "Vigas, Colunas, Estruturas Metálicas",
       construction_cost: "Estrutura Metálica",
@@ -467,7 +467,7 @@ async function main() {
     data: {
       workerSpaceId: workerSpace2.id,
       nf: "NF-003101",
-      issuer: "Segurança e Vigilância",
+      issuer: new Date("2024-12-10"),
       supplier: "Segurança Total",
       product_and_services: "Serviços de segurança e vigilância",
       construction_cost: "Segurança",
@@ -487,7 +487,7 @@ async function main() {
     data: {
       workerSpaceId: workerSpace1.id,
       nf: "NF-003200",
-      issuer: "Materiais Hidráulicos",
+      issuer: new Date("2024-12-10"),
       supplier: "Hidráulica Completa",
       product_and_services: "Tubos, Conexões, Registros",
       construction_cost: "Instalações Hidráulicas",
@@ -506,7 +506,7 @@ async function main() {
     data: {
       workerSpaceId: workerSpace1.id,
       nf: "NF-003201",
-      issuer: "Materiais Elétricos",
+      issuer: new Date("2024-12-10"),
       supplier: "Elétrica Moderna",
       product_and_services: "Fios, Disjuntores, Quadros Elétricos",
       construction_cost: "Instalações Elétricas",
@@ -525,7 +525,7 @@ async function main() {
     data: {
       workerSpaceId: workerSpace2.id,
       nf: "NF-003202",
-      issuer: "Alvenaria e Revestimento",
+      issuer: new Date("2024-12-10"),
       supplier: "Materiais de Construção Premium",
       product_and_services: "Tijolos, Cimento, Argamassa",
       construction_cost: "Alvenaria",
@@ -546,7 +546,7 @@ async function main() {
     data: {
       workerSpaceId: workerSpace1.id,
       nf: "NF-003300",
-      issuer: "Materiais de Cobertura",
+      issuer: new Date("2024-12-10"),
       supplier: "Coberturas e Telhas",
       product_and_services: "Telhas, Estruturas de Cobertura",
       construction_cost: "Cobertura",
@@ -565,7 +565,7 @@ async function main() {
     data: {
       workerSpaceId: workerSpace1.id,
       nf: "NF-003301",
-      issuer: "Portas e Janelas",
+      issuer: new Date("2024-12-10"),
       supplier: "Esquadrias Modernas",
       product_and_services: "Portas, Janelas, Esquadrias",
       construction_cost: "Esquadrias",
@@ -584,7 +584,7 @@ async function main() {
     data: {
       workerSpaceId: workerSpace2.id,
       nf: "NF-003302",
-      issuer: "Serviços de Terraplanagem",
+      issuer: new Date("2024-12-10"),
       supplier: "Terraplanagem e Movimentação",
       product_and_services: "Serviços de terraplanagem e movimentação de terra",
       construction_cost: "Terraplanagem",
